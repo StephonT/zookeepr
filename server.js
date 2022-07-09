@@ -1,5 +1,6 @@
 const express = require('express')
 const app = express();
+const PORT = process.env.PORT || 3001;
 
 //requiring the data (route is going to require data from this file) 
 const { animals } = require('./data/animals.json');
