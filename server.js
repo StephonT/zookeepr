@@ -1,9 +1,20 @@
-const express = require('express')
-const app = express();
-const PORT = process.env.PORT || 3001;
+//Needed to write new data into animal.json
+const fs = require('fs');
+const path = require('path');
 
+const express = require('express')
 //requiring the data (route is going to require data from this file) 
 const { animals } = require('./data/animals.json');
+
+const PORT = process.env.PORT || 3001;
+const app = express();
+
+//MIDDLEWARE
+// parse incoming string or array data
+app.use(express.urlencoded({ extended: true }));
+// parse incoming JSON data
+app.use(express.json());
+
 
 
 // This function will take in req.query as an argument and filter through the animals accordingly, returning the new filtered array.
@@ -50,41 +61,89 @@ function filterByQuery(query, animalsArray) {
       return filteredResults;
     }
 
-
+// Find By Id Function
     function findById(id, animalsArray) {
       const result = animalsArray.filter(animal => animal.id === id)[0];
       return result;
-    };
+    }
+
+    
+    
+    //Create New Animal Function
+    function createNewAnimal(body, animalsArray) {
+      
+      const animal = body;
+
+      animalsArray.push(animal);
+
+      fs.writeFileSync(path.join(__dirname, './data/animals.json'),
+      JSON.stringify({ animals: animalsArray }, null, 2)
+      );
+      
+      //return finished code to post route for response
+      return animal;
+    }
 
 
-//Adding the route
+    //Validation function
+    function validateAnimal(animal) {
+      if (!animal.name || typeof animal.name !== 'string') {
+        return false;
+      }
+      if (!animal.species || typeof animal.species !== 'string') {
+        return false;
+      }
+      if (!animal.diet || typeof animal.diet !== 'string') {
+        return false;
+      }
+      if (!animal.personalityTraits || !Array.isArray(animal.personalityTraits)) {
+        return false;
+      }
+      return true;
+    }
+
+//START OF ROUTES
 
 //search by query
 app.get('/api/animals', (req, res) => {
-    let results = animals;
-    if(req.query) {
-      results = filterByQuery(req.query, results);
-    }
-
-    res.json(results);
-  });
+  let results = animals;
+  if (req.query) {
+    results = filterByQuery(req.query, results);
+  }
+  res.json(results);
+});
 
 //search by id
-  app.get('/api/animals/:id', (req, res) => {
-    const result = findById(req.params.id, animals);
-    if (result) {
-      res.json(result);
-    } else {
-      res.send(404);
-    }
+app.get('/api/animals/:id', (req, res) => {
+  const result = findById(req.params.id, animals);
+  if (result) {
     res.json(result);
-  })
+  } else {
+    res.send(404);
+  }
+});
+
+// POST ROUTE
+app.post('/api/animals', (req, res) => {
+  //set id based on what the next index of the array will be
+  req.body.id = animals.length.toString();
+
+  //if any data in req.body is incorrect, send 400 error back
+  if(!validateAnimal(req.body)) {
+    res.status(400).send('The animal is not properly formatted.');
+  } else {
+    const animal = createNewAnimal(req.body, animals);
+    res.json(animal);
+  }
+});
+
+  //END OF ROUTES
 
  
 
   // Making sure server is listening for request
-app.listen(PORT, () => {
+  app.listen(PORT, () => {
     console.log(`API server now on port ${PORT}!`);
-});
+  });
 
 
