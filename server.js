@@ -14,6 +14,8 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 // parse incoming JSON data
 app.use(express.json());
+// making http GET request for CSS 
+app.use(express.static('public'));
 
 
 
@@ -137,6 +139,12 @@ app.post('/api/animals', (req, res) => {
   }
 });
 
+
+// adding route to server.js
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, './public/index.html'));
+});
+
   //END OF ROUTES
 
  
@@ -147,3 +155,4 @@ app.post('/api/animals', (req, res) => {
   });
 
 
+  
