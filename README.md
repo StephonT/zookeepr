@@ -18,6 +18,9 @@
   ## Usage
   This application will allow users to view, add, and search animals or zookeepers.
   Please view deployed live Heroku: <a href="https://aqueous-thicket-08953.herokuapp.com/">URL</a>
+  
+  ![Zookeeper SS](https://user-images.githubusercontent.com/104699408/179524414-b68713d5-f543-4b82-b934-3244be6376b2.jpg)
+
 
   ## License
   This project is license under MIT
